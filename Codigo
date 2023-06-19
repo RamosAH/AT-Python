@@ -47,16 +47,12 @@ def verificar_validade_data(data):
   if ano > hoje.year:
     print("Ano inválido!! Não estamos aceitando cadastros de viajantes do tempo no momento\n\n")
     menu()
-  elif ano == hoje.year:
-    if mes > hoje.month:
-      print("Mês inválido!! Não estamos aceitando cadastros de viajantes do tempo no momento\n\n")
-      menu()
-    elif mes == hoje.month:
-      if dia > hoje.day:
-        print("dia inválido!! Não estamos aceitando cadastros de viajantes do tempo no momento\n\n")
-        menu()
-      else:
-        return data
+  elif ano == hoje.year and mes > hoje.month:
+    print("Mês inválido!! Não estamos aceitando cadastros de viajantes do tempo no momento\n\n")
+    menu()
+  elif ano == hoje.year and mes == hoje.month and dia > hoje.day:
+    print("dia inválido!! Não estamos aceitando cadastros de viajantes do tempo no momento\n\n")
+    menu()
   else:
     return data
     
@@ -199,35 +195,35 @@ def receber_dados():
 
 #Tranforma a idade em dias
 def idade_em_dias(data):
-    hoje = date.today()
-    dia_atual = hoje.day
-    mes_atual = hoje.month
-    ano_atual = hoje.year
-    #data_atual = "17/06/2023"
-    #dia_atual, mes_atual, ano_atual = map(int, data_atual.split('/'))
-    dia_niver, mes_niver, ano_niver = map(int, data.split('/'))
+  hoje = date.today()
+  dia_atual = hoje.day
+  mes_atual = hoje.month
+  ano_atual = hoje.year
+  #data_atual = "17/06/2023"
+  #dia_atual, mes_atual, ano_atual = map(int, data_atual.split('/'))
+  dia_niver, mes_niver, ano_niver = map(int, data.split('/'))
 
-    dias_por_mes = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+  dias_por_mes = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
-    if ano_atual % 4 == 0 and ano_atual % 100 != 0 or ano_atual % 400 == 0:
-        dias_por_mes[1] = 29
+  if ano_atual % 4 == 0 and ano_atual % 100 != 0 or ano_atual % 400 == 0:
+    dias_por_mes[1] = 29
 
-    def contar_dias(dia, mes, ano):
-        total_dias = dia
-        for i in range(mes - 1):
-            total_dias += dias_por_mes[i]
-        total_dias += (ano - 1) * 365  
-        total_dias += (ano - 1) // 4  
-        total_dias -= (ano - 1) // 100
-        total_dias += (ano - 1) // 400  
-        return total_dias
+  def contar_dias(dia, mes, ano):
+    total_dias = dia
+    for i in range(mes - 1):
+        total_dias += dias_por_mes[i]
+    total_dias += (ano - 1) * 365  
+    total_dias += (ano - 1) // 4  
+    total_dias -= (ano - 1) // 100
+    total_dias += (ano - 1) // 400  
+    return total_dias
 
-    dias_passados_atual = contar_dias(dia_atual, mes_atual, ano_atual)
-    dias_passados_niver = contar_dias(dia_niver, mes_niver, ano_niver)
+  dias_passados_atual = contar_dias(dia_atual, mes_atual, ano_atual)
+  dias_passados_niver = contar_dias(dia_niver, mes_niver, ano_niver)
 
-    diferenca = dias_passados_atual - dias_passados_niver
+  diferenca = dias_passados_atual - dias_passados_niver
 
-    return diferenca
+  return diferenca
 #---------------------------Fim das Funcões extras-------------------------------
 
 
