@@ -1,0 +1,339 @@
+from datetime import date
+
+lista_cadastros = []
+
+#Menu
+def menu():
+  print('''\n------> Menu de opções <-------\n 
+  1 - Inserir novo cadastro
+  2 - Alterar CPF
+  3 - Trocar sobrenomes
+  4 - Remover cadastro
+  5 - Listar todos os cadastros
+  6 - Encerrar''')
+  opcao = input("Escolha uma opção: ")
+  if opcao.isnumeric():
+    opcao = int(opcao)
+    if opcao == 1:
+      return Inserir_novo_cadastro()
+    elif opcao == 2:
+      return Alterar_CPF()
+    elif opcao == 3:
+      return Trocar_sobrenomes()
+    elif opcao == 4:
+      return Remover_cadastro()
+    elif opcao == 5:
+      return Listar_todos_os_cadastros(lista_cadastros)
+    elif opcao == 6:
+      return Encerrar()
+    else:
+      print(f"Desculpe! A funcionalidade '{opcao}' ainda não foi implementada\n\n")
+      return menu()
+  else:
+    print("Insira somente números!\n\n")
+    return menu()
+
+#--------------------------------Verificações-------------------------------------
+#Verifica se a lista possui cadastros
+def verificar_lista():
+  if len(lista_cadastros) == 0:
+    print("Ainda não existe nenhuma pessoa cadastrada!\n\n")
+    menu()
+
+#Validação de validade da data
+def verificar_validade_data(data):
+  hoje = date.today()
+  dia, mes, ano = map(int,data.split("/"))
+  if ano > hoje.year:
+    print("Ano inválido!! Não estamos aceitando cadastros de viajantes do tempo no momento\n\n")
+    menu()
+  elif ano == hoje.year:
+    if mes > hoje.month:
+      print("Mês inválido!! Não estamos aceitando cadastros de viajantes do tempo no momento\n\n")
+      menu()
+    elif mes == hoje.month:
+      if dia > hoje.day:
+        print("dia inválido!! Não estamos aceitando cadastros de viajantes do tempo no momento\n\n")
+        menu()
+      else:
+        return data
+  else:
+    return data
+    
+#Validação de formato da data
+def verificar_formato_data(data):
+  try:
+    data = list(data.split("/"))
+    if len(data[0]) > 2:
+      print("Dia inválido\n\n")
+      menu()
+    if len(data[1]) > 2 or 1 < int(data[1]) > 12:
+      print("Mês inválido\n\n")
+      menu()
+      
+    data = '/'.join(data)
+    dia, mes, ano = map(int,data.split("/"))
+    valida = False
+    
+    if mes == 1 or mes == 3 or mes == 5 or mes == 7 or mes == 8 or mes == 10 or mes == 12:
+      if 1 <= dia <= 31:
+        valida = True
+      else:
+        print("Dia inválido\n\n")
+        menu()
+        
+    elif mes == 4 or mes == 6 or mes == 9 or mes == 11:
+      if 1 <= dia <= 30:
+        valida = True
+      else:
+        print("Dia inválido\n\n")
+        menu() 
+        
+    elif mes == 2:
+      if ano % 4 == 0 and ano % 100 != 0 or ano % 400 == 0:
+        if 1 <= dia <= 29:
+          valida = True
+        else:
+          print("Dia inválido\n\n")
+          menu()
+      elif 1 <= dia <= 28:
+          valida = True
+      else:
+        print("Dia inválido\n\n")
+        menu()
+  
+    if valida:
+      return data
+  except:
+    print("Data deve estar no formato dd/mm/aaaa\n\n")
+    menu()
+    
+#Validação de CPF
+def verificar_cpf(cpf):
+  cpf = list(cpf)
+  if len(cpf) == 0:
+    print("Digite um CPF!\n\n")
+    menu()
+  for alg in cpf:
+    if alg.isalpha():
+      print("CPF inválido!\n\n")
+      menu()
+  cpf = ''.join(filter(str.isdigit, cpf))
+  if len(cpf) != 11:
+    print("CPF inválido!!\n\n")
+    menu()
+    
+  for cadastro in lista_cadastros:
+    if cadastro['cpf'] == cpf:
+      print("CPF já cadastrado!!\n\n")
+      menu()
+
+  if int(cpf[8]) in (6,7,8):
+    print("CPFs da região sudeste não são aceitos!!\n\n")
+    menu()
+  
+  soma = sum(int(cpf[i]) * (10 - i) for i in range(9))
+  resto = (soma * 10) % 11
+  if resto == 10 or resto == int(cpf[9]):
+    digito1_valido = True
+  else:
+    return False
+
+  soma = sum(int(cpf[i]) * (11 - i) for i in range(10))
+  resto = (soma * 10) % 11
+  if resto == 10 or resto == int(cpf[10]):
+    digito2_valido = True
+  else:
+    return False
+
+  if digito1_valido and digito2_valido:
+    return cpf
+  else:
+    print("CPF inválido!\n\n")
+    menu()
+    
+#Validação de Nome
+def validar_nome(nome):
+  if nome == "":
+    print("Insira um nome!!\n\n")
+    return menu()
+  nome = list(nome)
+  for alg in nome:
+    if alg.isnumeric():
+      print("Insira somente letras!!\n\n")
+      return menu()
+    elif " " in nome:
+      print("Nome deve ser uma palavra sem espaços!!\n\n")
+      return menu()
+  nome = ''.join(nome)
+  nome = nome.capitalize()
+  return nome
+
+#Verificar se o Id existe
+def verificar_id_existe(id):
+  if id == "":
+    print("Id inválido!\n\n")
+    menu()
+  if id.isalpha():
+    print("Id inválido!\n\n")
+    menu()
+  for cadastro in lista_cadastros:
+    if cadastro['id'] == int(id):
+      return int(id)
+  else:
+    print("Id inválido!\n\n")
+    menu()
+#----------------------------Fim das verificações--------------------------------
+
+
+
+#------------------------------Funcões extras------------------------------------
+#Recebe os dados, faz as validações e retorna os campos
+def receber_dados():
+  primeiro_nome = validar_nome(input("Primeiro nome: "))
+  segundo_nome = validar_nome(input("Segundo nome: "))
+  cpf = verificar_cpf(input("CPF: "))
+  data_de_nascimento = verificar_formato_data(input("Data de nascimento: "))
+  data_de_nascimento = verificar_validade_data(data_de_nascimento)
+  return primeiro_nome, segundo_nome, cpf, data_de_nascimento
+
+#Tranforma a idade em dias
+def idade_em_dias(data):
+    hoje = date.today()
+    dia_atual = hoje.day
+    mes_atual = hoje.month
+    ano_atual = hoje.year
+    #data_atual = "17/06/2023"
+    #dia_atual, mes_atual, ano_atual = map(int, data_atual.split('/'))
+    dia_niver, mes_niver, ano_niver = map(int, data.split('/'))
+
+    dias_por_mes = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+
+    if ano_atual % 4 == 0 and ano_atual % 100 != 0 or ano_atual % 400 == 0:
+        dias_por_mes[1] = 29
+
+    def contar_dias(dia, mes, ano):
+        total_dias = dia
+        for i in range(mes - 1):
+            total_dias += dias_por_mes[i]
+        total_dias += (ano - 1) * 365  
+        total_dias += (ano - 1) // 4  
+        total_dias -= (ano - 1) // 100
+        total_dias += (ano - 1) // 400  
+        return total_dias
+
+    dias_passados_atual = contar_dias(dia_atual, mes_atual, ano_atual)
+    dias_passados_niver = contar_dias(dia_niver, mes_niver, ano_niver)
+
+    diferenca = dias_passados_atual - dias_passados_niver
+
+    return diferenca
+#---------------------------Fim das Funcões extras-------------------------------
+
+
+
+#------------------------------Funcões do Menu----------------------------------
+#Insere um novo cadastro
+def Inserir_novo_cadastro():
+  id = input("ID (opcional): ")
+  
+  if id.isalpha():
+    print("Insira somente números!\n\n")
+    menu()
+    
+  if id == "":
+    dados = receber_dados()
+    id = len(lista_cadastros) + 1
+    lista_cadastros.insert(
+      int(id) - 1, {
+        'id': int(id),
+        'primeiro_nome': dados[0],
+        'segundo_nome': dados[1],
+        'cpf': dados[2],
+        'data_de_nascimento': dados[3]
+      })
+
+  elif int(id) == 0:
+    print("Id 0 é inválido!\n\n")
+    menu()
+    
+  elif int(id) > len(lista_cadastros) + 1:
+    print(f"Id máximo possível: '{len(lista_cadastros) + 1}'")
+    menu()
+    
+  else:
+    dados = receber_dados()
+    for cadastro in lista_cadastros:
+      if cadastro['id'] >= int(id):
+        cadastro['id'] += 1
+    lista_cadastros.insert(
+      int(id) - 1, {
+        'id': int(id),
+        'primeiro_nome': dados[0],
+        'segundo_nome': dados[1],
+        'cpf': dados[2],
+        'data_de_nascimento': dados[3]
+      })
+
+  print("Cadastro inserido com sucesso!!\n\n")
+  menu()
+
+#Altera o CPF de um cadastro
+def Alterar_CPF():
+  verificar_lista()
+  id = verificar_id_existe(input("ID: "))
+  novo_cpf = verificar_cpf(input("Novo CPF: "))
+  for cadastro in lista_cadastros:
+    if cadastro['id'] == int(id):
+      cadastro['cpf'] = novo_cpf
+  print("CPF alterado com sucesso!\n\n")
+  menu()
+    
+#Troca o sobrenome entre 2 cadastros
+def Trocar_sobrenomes():
+  verificar_lista()
+  id_1 = verificar_id_existe(input("ID 1: "))
+  id_2 = verificar_id_existe(input("ID 2: "))
+  id_1 = int(id_1)
+  id_2 = int(id_2)
+  for cadastro in lista_cadastros:
+    if cadastro['id'] == id_1:
+      sobrenome_1 = cadastro['segundo_nome']
+    if cadastro['id'] == id_2:
+      sobrenome_2 = cadastro['segundo_nome']
+  for cadastro in lista_cadastros:
+    if cadastro['id'] == id_1:
+      cadastro['segundo_nome'] = sobrenome_2
+    if cadastro['id'] == id_2:
+      cadastro['segundo_nome'] = sobrenome_1
+  print("Sobrenomes trocados com sucesso!\n\n")
+  menu()
+
+#Remove um cadastro
+def Remover_cadastro():
+  verificar_lista()
+  id = verificar_id_existe(input("ID: "))
+  id = int(id)
+  for cadastro in lista_cadastros:
+    if cadastro['id'] >= id:
+      cadastro['id'] -= 1
+  lista_cadastros.pop(int(id) - 1)
+  print("Cadastro Removido com sucesso!\n\n")
+  menu()
+
+#Lista todos os cadastros
+def Listar_todos_os_cadastros(lista_cadastros):
+  verificar_lista()
+  for cadastro in lista_cadastros:
+    print(
+      f"\n N° Cadastro: {cadastro['id']}\n Nome: {cadastro['primeiro_nome']} {cadastro['segundo_nome']}\n CPF: {cadastro['cpf']}\n Data de nascimento: {cadastro['data_de_nascimento']}\n Idade em dias: {idade_em_dias(cadastro['data_de_nascimento'])}"
+    )
+  menu()
+
+#Encerra o programa
+def Encerrar():
+  exit("Programa encerrado!")
+#--------------------------Fim das funcões do Menu------------------------------
+
+#Chamada da função principal "Menu"
+menu()
