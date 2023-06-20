@@ -106,15 +106,19 @@ def verificar_formato_data(data):
     
 #Validação de CPF
 def verificar_cpf(cpf):
+  cpf = ''.join(filter(str.isdigit, cpf))
   cpf = list(cpf)
+  
   if len(cpf) == 0:
     print("Digite um CPF!\n\n")
     menu()
+    
   for alg in cpf:
     if alg.isalpha():
       print("CPF inválido!\n\n")
       menu()
-  cpf = ''.join(filter(str.isdigit, cpf))
+      
+  cpf = ''.join(cpf)
   if len(cpf) != 11:
     print("CPF inválido!!\n\n")
     menu()
@@ -133,14 +137,14 @@ def verificar_cpf(cpf):
   if resto == 10 or resto == int(cpf[9]):
     digito1_valido = True
   else:
-    return False
+    digito1_valido = False
 
   soma = sum(int(cpf[i]) * (11 - i) for i in range(10))
   resto = (soma * 10) % 11
   if resto == 10 or resto == int(cpf[10]):
     digito2_valido = True
   else:
-    return False
+    digito2_valido = False
 
   if digito1_valido and digito2_valido:
     return cpf
@@ -170,12 +174,13 @@ def verificar_id_existe(id):
   if id == "":
     print("Id inválido!\n\n")
     menu()
-  if id.isalpha():
-    print("Id inválido!\n\n")
-    menu()
-  for cadastro in lista_cadastros:
-    if cadastro['id'] == int(id):
-      return int(id)
+  if id.isnumeric():
+    for cadastro in lista_cadastros:
+      if cadastro['id'] == int(id):
+        return int(id)
+    else:
+      print("Id inválido!\n\n")
+      menu()
   else:
     print("Id inválido!\n\n")
     menu()
@@ -233,10 +238,6 @@ def idade_em_dias(data):
 def Inserir_novo_cadastro():
   id = input("ID (opcional): ")
   
-  if id.isalpha():
-    print("Insira somente números!\n\n")
-    menu()
-    
   if id == "":
     dados = receber_dados()
     id = len(lista_cadastros) + 1
@@ -248,28 +249,32 @@ def Inserir_novo_cadastro():
         'cpf': dados[2],
         'data_de_nascimento': dados[3]
       })
-
-  elif int(id) == 0:
-    print("Id 0 é inválido!\n\n")
-    menu()
     
-  elif int(id) > len(lista_cadastros) + 1:
-    print(f"Id máximo possível: '{len(lista_cadastros) + 1}'")
-    menu()
+  elif id.isnumeric():
+    if int(id) == 0:
+      print("Id 0 é inválido!\n\n")
+      menu()
     
+    elif int(id) > len(lista_cadastros) + 1:
+      print(f"Id máximo possível: '{len(lista_cadastros) + 1}'")
+      menu()
+    
+    else:
+      dados = receber_dados()
+      for cadastro in lista_cadastros:
+        if cadastro['id'] >= int(id):
+          cadastro['id'] += 1
+      lista_cadastros.insert(
+        int(id) - 1, {
+          'id': int(id),
+          'primeiro_nome': dados[0],
+          'segundo_nome': dados[1],
+          'cpf': dados[2],
+          'data_de_nascimento': dados[3]
+        })
   else:
-    dados = receber_dados()
-    for cadastro in lista_cadastros:
-      if cadastro['id'] >= int(id):
-        cadastro['id'] += 1
-    lista_cadastros.insert(
-      int(id) - 1, {
-        'id': int(id),
-        'primeiro_nome': dados[0],
-        'segundo_nome': dados[1],
-        'cpf': dados[2],
-        'data_de_nascimento': dados[3]
-      })
+    print("Id inválido!\n\n")
+    menu()
 
   print("Cadastro inserido com sucesso!!\n\n")
   menu()
@@ -328,7 +333,7 @@ def Listar_todos_os_cadastros(lista_cadastros):
 
 #Encerra o programa
 def Encerrar():
-  exit("Programa encerrado!")
+  quit("Programa encerrado!\nAté a próxima")
 #--------------------------Fim das funcões do Menu------------------------------
 
 #Chamada da função principal "Menu"
